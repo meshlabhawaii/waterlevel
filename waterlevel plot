@@ -1,0 +1,35 @@
+import requests
+import matplotlib.pyplot as plt
+import time
+from matplotlib.dates import DateFormatter
+from datetime import datetime
+
+noaa = 'https://tidesandcurrents.noaa.gov/api/datagetter?product=water_level&application=NOS.COOPS.TAC.WL&begin_date=20180601&end_date=20180701&datum=MLLW&station=1612480&time_zone=GMT&units=english&format=json'
+grog = 'https://grogdata.soest.hawaii.edu/data/2/node-046/ReceptionTime,Timestamp,d2w.json?time_col=ReceptionTime&begin=1527811200&end=1530403200'
+
+n = requests.get(noaa).json()
+dtn = [datetime.strptime(d['t'], '%Y-%m-%d %H:%M') for d in n['data']]
+mn = [0.3048*float(d['v']) for d in n['data']]
+
+g = requests.get(grog).json()
+dtg = [datetime.fromtimestamp(d[1]+10*60*60) for d in g]
+mg = [(1400-d[2])/1000 for d in g]
+
+
+plt.figure()
+ax = plt.subplot(1, 1, 1)
+
+ax.plot(dtn, mn, 'r.:', alpha = 0.3)
+ax.plot(dtg, mg, 'b.:', alpha = 0.3)
+
+
+ax.set_title('who cares')
+ax.set_xlabel('Datetime (GMT)')
+ax.set_ylabel('MLLW, feet')
+ax.legend(loc=2)
+ax.grid(True)
+plt.tight_layout()
+plt.gcf().autofmt_xdate()
+#plt.savefig('haha.png', dpi=300)
+plt.show()
+
